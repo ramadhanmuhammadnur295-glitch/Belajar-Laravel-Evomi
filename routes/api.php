@@ -1,11 +1,11 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProductController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,9 +18,16 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 // Produk Evomi
-Route::get('/products', [ProductController::class, 'index']);
-Route::get('/products/{id}', [ProductController::class, 'show']);
+// Route::get('/products', [ProductController::class, 'index']);
+// Route::get('/products/{id}', [ProductController::class, 'show']);
 
+Route::prefix('products')->group(function () {
+    Route::get('/', [ProductController::class, 'index']);      // Read All
+    Route::post('/', [ProductController::class, 'store']);     // Create
+    Route::get('{id}', [ProductController::class, 'show']);    // Read Detail
+    Route::post('{id}', [ProductController::class, 'update']);  // Update
+    Route::delete('{id}', [ProductController::class, 'destroy']); // Delete
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -29,7 +36,7 @@ Route::get('/products/{id}', [ProductController::class, 'show']);
 */
 
 Route::middleware('auth:sanctum')->group(function () {
-    
+
     // User Profile & Logout
     Route::get('/user', function (Request $request) {
         return $request->user();
@@ -38,10 +45,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Keranjang Belanja (Cart)
     Route::prefix('cart')->group(function () {
-        Route::get('/', [CartController::class, 'index']);          // Lihat isi keranjang
-        Route::post('/add', [CartController::class, 'addToCart']); // Tambah ke keranjang
-        Route::delete('/{id}', [CartController::class, 'remove']); // Hapus satu item
-        Route::delete('/', [CartController::class, 'clear']);      // Kosongkan keranjang
+        Route::get('/', [CartController::class, 'index']);           // Lihat isi keranjang
+        Route::post('/add', [CartController::class, 'addToCart']);   // Tambah ke keranjang
+        Route::delete('/{id}', [CartController::class, 'destroy']);  // Hapus satu item
+        Route::delete('/', [CartController::class, 'clear']);        // Kosongkan keranjang
     });
 
     // Pesanan (Orders)

@@ -11,6 +11,13 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withMiddleware(function (Middleware $middleware) {
+        $middleware->validateCsrfTokens(except: [
+            'api/*', // Mengecualikan semua route API dari cek CSRF
+        ]);
+
+        $middleware->statefulApi(); // Penting untuk otentikasi Sanctum
+    })
     ->withMiddleware(function (Middleware $middleware): void {
         //
     })

@@ -6,7 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Storage; // Pastikan ini di-import di atas
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
@@ -96,49 +96,46 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
-        $validator = Validator::make($request->all(), [
-            'name'             => 'required|string|max:255',
-            'username'         => 'required|string|unique:users,username,' . $user->id,
-            'current_password' => 'nullable|required_with:new_password',
-            'new_password'     => 'nullable|min:8|confirmed',
-            'image'            => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        // 1. Validasi
+        $request->validate([
+            'name'     => 'required|string|max:255',
+            'username' => 'required|string|unique:users,username,' . $id,
+            'image'    => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // max 2MB
         ]);
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+        // 2. Handle Upload Gambar
+        if ($request->hasFile('image')) {
+            // Hapus foto lama jika ada (opsional tapi disarankan agar tidak menumpuk)
+            if ($user->image) {
+                Storage::disk('public')->delete('profiles/' . $user->image);
+            }
+
+            // Ambil file
+            $file = $request->file('image');
+
+            // Buat nama unik: misal 1_1681543200.jpg
+            $fileName = $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+
+            // SIMPAN KE: storage/app/public/profiles
+            $file->storeAs('profiles', $fileName, 'public');
+
+            // Simpan nama file ke database
+            $user->image = $fileName;
         }
 
-        // 1. Update Identity Dasar
         $user->name = $request->name;
         $user->username = $request->username;
 
-        // 2. Logika Update Password
-        if ($request->filled('new_password')) {
-            if (!Hash::check($request->current_password, $user->password)) {
-                return response()->json(['message' => 'Current password tidak cocok.'], 422);
-            }
-            $user->password = Hash::make($request->new_password);
-        }
-
-        // 3. Logika Update Image
-        if ($request->hasFile('image')) {
-            // Hapus foto lama jika bukan default
-            if ($user->image && $user->image !== 'default-avatar.png') {
-                Storage::delete('public/profiles/' . $user->image);
-            }
-
-            $image = $request->file('image');
-            $imageName = time() . '_' . $image->getClientOriginalName();
-            $image->storeAs('public/profiles', $imageName);
-            $user->image = $imageName;
+        // Update password jika ada...
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
         }
 
         $user->save();
 
         return response()->json([
-            'success' => true,
-            'message' => 'Profile Evomi updated successfully!',
-            'data'    => $user
+            'message' => 'Identity successfully refined.',
+            'data' => $user
         ]);
     }
 

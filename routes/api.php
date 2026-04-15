@@ -98,6 +98,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::put('/users/{id}', [UserController::class, 'update']);
 
+    // ✅ Ubah menjadi POST:
+    // Route::post('/users/{id}', [UserController::class, 'update']);
+
     // Detail, Update, dan Delete satu user
     Route::get('/users/{id}', [UserController::class, 'show']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);

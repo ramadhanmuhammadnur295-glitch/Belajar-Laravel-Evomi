@@ -21,6 +21,7 @@ class CartController extends Controller
                     'carts.product_id',
                     'products.nama',   // Pastikan di tabel products kolomnya 'nama'
                     'products.harga_retail',  // Pastikan di tabel products kolomnya 'harga'
+                    'products.image_url',  // Pastikan di tabel products kolomnya 'image_url'
                     'carts.jumlah'     // Pastikan di tabel carts kolomnya 'jumlah'
                 )
                 ->get();
@@ -32,6 +33,7 @@ class CartController extends Controller
                     'name' => $item->nama,
                     'price' => (int) $item->harga_retail,
                     'quantity' => (int) $item->jumlah,
+                    'image_url' => $item->image_url,
                     'image' => $item->product_id, // Kita asumsikan nama file gambar = ID Produk
                 ];
             });
@@ -40,7 +42,6 @@ class CartController extends Controller
                 'status' => 'success',
                 'cart' => $formattedCart,
             ]);
-
         } catch (\Exception $e) {
             // Jika error, Laravel akan mengirimkan pesan apa yang salah ke Next.js
             return response()->json([

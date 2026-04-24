@@ -55,7 +55,6 @@ Route::middleware(['auth:sanctum'])->prefix('admin')->group(function () {
     Route::prefix('orders')->group(function () {
         Route::get('/', [OrderController::class, 'index']);              // Riwayat pesanan user
         Route::get('/{id}', [OrderController::class, 'show']);           // Detail pesanan tertentu
-        // Route::get('/{id}', [OrderController::class, 'adminShow']); // Detail pesanan untuk admin
         Route::post('/checkout', [OrderController::class, 'checkout']);  // Proses beli
 
         // --- Order Routes Baru ---
@@ -67,7 +66,6 @@ Route::middleware(['auth:sanctum'])->prefix('admin')->group(function () {
     });
 
     Route::post('/logout', [AdminAuthController::class, 'logout']);        // logout admin
-
     Route::get('/stats', [AdminDashboardController::class, 'getStats']);
 
     // User Controller
@@ -99,8 +97,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::put('/users/{id}', [UserController::class, 'update']);
 
-    // ✅ Ubah menjadi POST:
-    // Route::post('/users/{id}', [UserController::class, 'update']);
+    // ✅ Ubah menjadi POST untuk logout agar sesuai dengan praktik RESTful
 
     // Detail, Update, dan Delete satu user
     Route::get('/users/{id}', [UserController::class, 'show']);
